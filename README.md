@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# RescuEats AI
 
-## Getting Started
+A Next.js app that helps reduce food waste by analyzing an uploaded fridge/receipt image, estimating ecological savings, and generating zero-waste cooking recipes.
 
-First, run the development server:
+## Features
+
+- Upload an image (fridge interior or grocery receipt)
+- Multi-modal analysis via Google Gemini
+- Structured JSON output rendered into:
+  - Ecological savings (`carbonSavedKg`, `waterSavedLiters` + headline)
+  - Detected items + shelf-life window
+  - Exactly **2** recipes
+  - Compost / scrap upcycling guidance
+
+## Tech Stack
+
+- Next.js (App Router)
+- TailwindCSS
+- `@google/generative-ai`
+
+## Prerequisites
+
+- Node.js installed
+- A Google Gemini API key
+
+## Setup (Local)
+
+### 1) Install dependencies
+
+```bash
+npm install
+```
+
+### 2) Configure environment variables
+
+Create a file named **`.env.local`** in the project root:
+
+```bash
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+> The server code reads `process.env.GEMINI_API_KEY`.
+
+### 3) Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the app in your browser:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If port 3000 is already in use, Next may fall back to another port (e.g., 3001). Use the URL printed in the terminal.
 
-## Learn More
+## API Endpoint
 
-To learn more about Next.js, take a look at the following resources:
+- **POST** `/api/analyze-waste`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Body:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```json
+{
+  "image": "data:image/png;base64,...."
+}
+```
 
-## Deploy on Vercel
+The route returns JSON matching the UI schema.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notes on Gemini Model IDs
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The app uses the Gemini models available in your account for `generateContent()`.
+
+If you previously saw errors like:
+
+- `gemini-1.5-flash is not found for API version v1beta or not supported for generateContent`
+
+…it is handled by using supported fallback model IDs.
+
+## Scripts
+
+- `npm run dev` — start dev server
+- `npm run build` — build for production
+- `npm run start` — run production server
+- `npm run lint` — lint
+
+## Troubleshooting
+
+### Port confusion (3000 vs 3001)
+
+If you have multiple dev servers running, you may see different ports. Stop extra servers, then rerun `npm run dev`.
+
+### Invalid image format
+
+The endpoint expects a **data URI**: `data:image/<type>;base64,<base64>`.
+
